@@ -941,9 +941,13 @@ export function PageSidebar() {
 
 新しいページを作成するためのモーダルダイアログコンポーネントを実装します
 
-src/components/add-page-dialog.tsx
+src/components/add-page-dialog.tsx ファイルを作成します。
 
+```sh
+% touch src/components/add-page-dialog.tsx
 ```
+
+```sh
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1040,10 +1044,71 @@ export function AddPageDialog() {
 
 ```
 
+解説：
+今回も、コンテキストのフックを呼び出して、コンポーネントを実装しています！
+
+ダイアログコンポーネントの UX としては、：
+
+キーボードサポート：Enter キーでの送信対応
+バリデーション：タイトルが空の場合はボタンを無効化
+フォーカス管理：ダイアログ開閉時の適切なフォーカス制御
+アクセシビリティ：shadcn/ui の Dialog コンポーネントは ARIA 属性を自動で提供
+レスポンシブ対応：異なる画面サイズでの表示最適化
+shadcn/ui を使用することで、アクセシビリティが自動的に担保される利点があります！
+
+
 ### 7. アプリケーションの統合
 
 
+アプリケーションの統合
+最後に、全てのコンポーネントを統合してメインアプリケーションを完成させます：
 
+src/app.tsx ファイルを編集します。
+
+```tsx
+import { PageProvider, usePageContext } from "@/contexts/page-context";
+import { PageSidebar } from "@/components/page-sidebar";
+import { AddPageDialog } from "@/components/add-page-dialog";
+
+function NotionTodoAppInner() {
+  const { activePage } = usePageContext();
+
+  return (
+    <div className="min-h-screen bg-[#f0edd8] flex">
+      {/* 左サイドバー - ページナビゲーション */}
+      <PageSidebar />
+
+      {/* メインコンテンツエリア */}
+      <div className="flex-1 flex flex-col ml-64 transition-all duration-300 pr-6">
+        {/* トップヘッダー */}
+        <div className="backdrop-blur-sm px-6 pt-12 pb-6 space-y-6">
+          <div className="text-7xl text-stone-500">{activePage.emoji}</div>
+          <h1 className="text-4xl font-bold text-stone-800">
+            {activePage.title}
+          </h1>
+        </div>
+
+        {/* スクロール可能なコンテンツエリア */}
+        <div className="flex-1 overflow-auto">この後のタスクで実装！</div>
+      </div>
+
+      {/* モーダルダイアログ群 */}
+      <AddPageDialog />
+    </div>
+  );
+}
+
+/**
+ * アプリケーションのエントリーポイント
+ */
+export default function NotionTodoApp() {
+  return (
+    <PageProvider>
+      <NotionTodoAppInner />
+    </PageProvider>
+  );
+}
+```
 
 ## Chapter 05 アイデアブロックの実装
 ## Chapter 06 ToDo データベース機能の実装
