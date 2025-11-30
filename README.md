@@ -218,6 +218,52 @@ SWC とは？
 SWC（Speedy Web Compiler）は、JavaScript と TypeScript の、コンパイルとバンドルの両方を行うことが出来ます。
 
 ## 2 プロジェクトにTailwind CSS の導入
+
+Tailwind CSS は、ユーティリティファーストの CSS フレームワークです。
+
+### 1. tailwindcssと、その依存関係をインストール
+
+```sh
+npm install tailwindcss @tailwindcss/vite
+```
+
+### 2. vite.config.ts ファイルにプラグインを追加します。
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import tailwindcss from "@tailwindcss/vite";
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+})
+
+```
+
+### 3. ./src/index.cssファイルに、Tailwind CSS をインポートする
+
+./src/index.css　既存のソースコードは削除します。
+
+```css
+@import "tailwindcss";
+```
+
+を記載します。
+
+### 4. Tailwind CSSを試してみる
+
+src/App.tsx ファイルをH1タグに対し、スタイルを当ててみます。
+
+```tsx
+<h1 className='text-5xl text-blue-500'>Vite + React</h1>
+```
+### 5. 開発サーバーを起動する
+
+```sh
+npm run dev
+```
+
 ## 3 shadcn/ui の導入
 ## 4 ページ切り替えサイドバーの作成
 ## 5 アイデアブロックの実装
