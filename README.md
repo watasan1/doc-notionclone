@@ -1224,6 +1224,26 @@ Immer 関連のライブラリをインストールします
 % npm install immer use-immer
 ```
 
+解説：
+immer: コアライブラリ。不変更新のための基本機能を提供
+use-immer: React 用のカスタムフック。useState の Immer 版
+これらのライブラリにより、複雑な状態更新を簡潔に記述できるようになります。
+
+2. カスタムフックの作成
+
+アイデア管理のロジックを含むカスタムフックを実装します
+
+src/hooks/use-ideas-immer.ts ファイルを作成します。
+
+```
+% mkdir src/hooks && touch src/hooks/use-ideas-immer.ts
+```
+
+
+3. 
+
+4. 
+
 ## Chapter 06 ToDo データベース機能の実装
 ## Chapter 07 GitHub Pages へのデプロイ
 
