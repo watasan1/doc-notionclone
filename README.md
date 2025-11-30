@@ -710,11 +710,336 @@ export const INITIAL_TODOS: Todo[] = [
 
 ```
 
-
-
 ### 4. コンテキストの定義
+
+ページ状態を管理する Context API を実装します。
+
+src/contexts/page-context.tsx　ファイルを作成します。
+
+```sh
+% mkdir -p src/contexts/ && touch src/contexts/page-context.tsx
+```
+
+```
+import type { ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
+import type { Page } from "@/types";
+import { INITIAL_PAGES } from "@/constants/initial-data";
+
+interface PageContextType {
+  pages: Page[];
+  activePage: Page;
+  addPage: (title: string, emoji: string) => void;
+  setActivePage: (pageId: string) => void;
+  deletePage: (pageId: string) => void;
+  // UI状態（新規ページ作成ダイアログ用）
+  newPageTitle: string;
+  setNewPageTitle: (title: string) => void;
+  newPageEmoji: string;
+  setNewPageEmoji: (emoji: string) => void;
+  isAddPageDialogOpen: boolean;
+  setIsAddPageDialogOpen: (open: boolean) => void;
+}
+
+const PageContext = createContext<PageContextType | undefined>(undefined);
+
+interface PageProviderProps {
+  children: ReactNode;
+}
+
+export function PageProvider({ children }: PageProviderProps) {
+  const [pages, setPages] = useState<Page[]>(INITIAL_PAGES);
+  const [newPageTitle, setNewPageTitle] = useState("");
+  const [newPageEmoji, setNewPageEmoji] = useState("");
+  const [isAddPageDialogOpen, setIsAddPageDialogOpen] = useState(false);
+
+  // 現在アクティブなページを取得
+  const activePage = pages.find((page) => page.isActive) || pages[0];
+
+  /**
+   * 新しいページを作成する
+   */
+  const addPage = (title: string, emoji: string) => {
+    if (title.trim()) {
+      const newPage: Page = {
+        id: Date.now().toString(),
+        title: title.trim(),
+        isActive: false,
+        category: `page_${Date.now()}`,
+        emoji: emoji.trim() || "📝",
+      };
+      setPages((prev) => [...prev, newPage]);
+      setNewPageTitle("");
+      setNewPageEmoji("");
+      setIsAddPageDialogOpen(false);
+    }
+  };
+
+  /**
+   * アクティブページを変更する
+   */
+  const setActivePage = (pageId: string) => {
+    setPages((prev) =>
+      prev.map((page) => ({
+        ...page,
+        isActive: page.id === pageId,
+      }))
+    );
+  };
+
+  /**
+   * ページを削除する
+   */
+  const deletePage = (pageId: string) => {
+    if (pages.length > 1) {
+      const updatedPages = pages.filter((page) => page.id !== pageId);
+
+      // 削除されるページがアクティブだった場合、最初のページをアクティブに
+      if (pages.find((page) => page.id === pageId)?.isActive) {
+        updatedPages[0] = { ...updatedPages[0], isActive: true };
+      }
+
+      setPages(updatedPages);
+    }
+  };
+
+  const value: PageContextType = {
+    pages,
+    activePage,
+    addPage,
+    setActivePage,
+    deletePage,
+    newPageTitle,
+    setNewPageTitle,
+    newPageEmoji,
+    setNewPageEmoji,
+    isAddPageDialogOpen,
+    setIsAddPageDialogOpen,
+  };
+
+  return <PageContext.Provider value={value}>{children}</PageContext.Provider>;
+}
+
+/**
+ * PageContextにアクセスするためのカスタムフック
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export function usePageContext() {
+  const context = useContext(PageContext);
+  if (context === undefined) {
+    throw new Error("usePageContext must be used within a PageProvider");
+  }
+  return context;
+}
+
+```
+
+解説：
+Context API の実装パターンには重要なポイントがあります：
+
+カスタムフック：usePageContext でコンテキストへのアクセスを簡素化
+エラーハンドリング：Provider 外での使用時にエラーを投げる
+TypeScript 活用：型安全なインターフェース定義
+関数の分離：各操作を独立した関数として定義
+このパターンにより、コンポーネント間での状態共有が簡単になります。
+
+そして、// eslint-disable-next-line react-refresh/only-export-components は、
+
+１時的に ESLint のルールを無視するためのコメントです。
+一般的に、react の慣習として、１つのファイルからは、１つのコンポーネントを export するルールことが多いです。
+しかし、Context Provider とその Hook は密接に関連しているため、同じファイルに置くのが一般的です！
+
 ### 5. サイドバーコンポーネントの作成
+
+ページナビゲーション用のサイドバーを実装します
+
+src/components/page-sidebar.tsx を作成します。
+
+```sh
+% touch src/components/page-sidebar.tsx
+```
+
+```sh
+import { Plus, X } from "lucide-react";
+import { usePageContext } from "@/contexts/page-context";
+
+export function PageSidebar() {
+  const { pages, setActivePage, deletePage, setIsAddPageDialogOpen } =
+    usePageContext();
+
+  return (
+    <div className="fixed left-0 top-0 h-screen w-64 bg-[#f0edd8] backdrop-blur-sm border-r border-stone-200 flex flex-col shadow-sm z-20">
+      {/* サイドバーヘッダー */}
+      <div className="p-4 border-b border-stone-200">
+        <h1 className="text-xl font-bold text-stone-800">My Issue Tracker</h1>
+      </div>
+
+      {/* スクロール可能なページ一覧エリア */}
+      <div className="flex-1 overflow-auto">
+        <div className="px-3 py-4">
+          <h2 className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-3 px-2">
+            ページ
+          </h2>
+          <div className="space-y-1">
+            {pages.map((page) => (
+              <div key={page.id} className="group flex items-center">
+                {/* ページ選択ボタン */}
+                <button
+                  onClick={() => setActivePage(page.id)}
+                  className={`flex-1 flex items-center px-2 py-2 text-sm rounded-md transition-colors ${
+                    page.isActive
+                      ? "bg-stone-400/20 text-stone-800 font-medium shadow-sm"
+                      : "text-stone-700 hover:bg-stone-400/20 hover:text-stone-800"
+                  }`}
+                >
+                  <span className="mr-3 text-base">{page.emoji}</span>
+                  <span className="truncate">{page.title}</span>
+                </button>
+
+                {/* ページ削除ボタン - 最後の1ページは削除不可 */}
+                {pages.length > 1 && (
+                  <button
+                    onClick={() => deletePage(page.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-stone-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* ページ追加ボタン */}
+            <button
+              onClick={() => setIsAddPageDialogOpen(true)}
+              className="w-full flex items-center px-2 py-2 text-sm text-stone-500 hover:text-stone-900 hover:bg-stone-400/20 rounded-md transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-3" />
+              <span>新しいページ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+```
+
+解説：
+サイドバー UI には以下の要素が含まれています：
+
+固定レイアウト：fixed positioning で画面左端に固定
+アクティブ状態：現在選択中のページの視覚的フィードバック
+ホバー効果：削除ボタンは hover 時のみ表示（UX 改善）
+レスポンシブ対応：スクロール可能なコンテンツエリア
+アクセシビリティ：適切な color contrast と focus 状態
+ロジックは、コンテキストで管理しているので、マークアップが中心ですね！
+
+
+
 ### 6. ページ追加ダイアログの作成
+
+新しいページを作成するためのモーダルダイアログコンポーネントを実装します
+
+src/components/add-page-dialog.tsx
+
+```
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { usePageContext } from "@/contexts/page-context";
+
+export function AddPageDialog() {
+  const {
+    newPageTitle,
+    setNewPageTitle,
+    newPageEmoji,
+    setNewPageEmoji,
+    isAddPageDialogOpen,
+    setIsAddPageDialogOpen,
+    addPage,
+  } = usePageContext();
+
+  const handleAddPage = () => {
+    addPage(newPageTitle, newPageEmoji);
+  };
+
+  /**
+   * Enterキーでのページ作成を可能にする
+   */
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleAddPage();
+    }
+  };
+
+  return (
+    <Dialog open={isAddPageDialogOpen} onOpenChange={setIsAddPageDialogOpen}>
+      <DialogContent className="sm:max-w-md bg-white/95 border-stone-200">
+        <DialogHeader>
+          <DialogTitle className="text-stone-800">
+            新しいページを作成
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              ページタイトル
+            </label>
+            <Input
+              placeholder="ページタイトル"
+              value={newPageTitle}
+              onChange={(e) => setNewPageTitle(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="border-stone-200 focus:border-stone-500 focus:ring-stone-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              絵文字
+            </label>
+            <Input
+              placeholder="📝"
+              value={newPageEmoji}
+              onChange={(e) => setNewPageEmoji(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="border-stone-200 focus:border-stone-500 focus:ring-stone-500 text-2xl text-center"
+              maxLength={2}
+            />
+            <p className="text-xs text-stone-500 mt-1">
+              ページを表す絵文字を入力してください。空白の場合、📝が使用されます。
+            </p>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsAddPageDialogOpen(false)}
+              className="border-stone-200 text-stone-700 hover:bg-stone-100"
+            >
+              キャンセル
+            </Button>
+            <Button
+              onClick={handleAddPage}
+              disabled={!newPageTitle.trim()}
+              className="bg-stone-600 hover:bg-stone-700 text-white"
+            >
+              ページを作成
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+```
+
 ### 7. アプリケーションの統合
 
 
