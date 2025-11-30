@@ -110,7 +110,7 @@ ToDo データベース機能
 ## Chapter 06 ToDo データベース機能の実装
 ## Chapter 07 GitHub Pages へのデプロイ
 
-## 1 Vite による React プロジェクトの作成
+## Chapter 01 Vite による React プロジェクトの作成
 
 ### 1. Viteとは？
 
@@ -216,7 +216,7 @@ SWC とは？
 
 SWC（Speedy Web Compiler）は、JavaScript と TypeScript の、コンパイルとバンドルの両方を行うことが出来ます。
 
-## 2 プロジェクトにTailwind CSS の導入
+## Chapter 02 プロジェクトにTailwind CSS の導入
 
 Tailwind CSS は、ユーティリティファーストの CSS フレームワークです。
 
@@ -270,11 +270,239 @@ git add .
 git commit -m "Tailwind CSSのセットアップ"
 ```
 
-## 3 shadcn/ui の導入
-## 4 ページ切り替えサイドバーの作成
-## 5 アイデアブロックの実装
-## 6 ToDo データベース機能の実装
-## 7 GitHub Pages へのデプロイ
+## Chapter 03 shadcn/ui の導入
+
+### 1. shadcn/ui とは？
+
+shadcn/ui とは、アプリにコピーして貼り付けることができる美しく設計されたコンポーネント。アクセス可能。カスタマイズ可能。オープンソース。
+
+shadcn/ui の特徴は：
+
+コンポーネントライブラリではなく、アプリにコピーして貼り付けて使う「コンポーネントのコレクション」
+「コンポーネントの設計は、構造や振る舞いと、スタイルは分離されるべき」というコンセプト基づいている
+Tailwind CSS と Radix UI をベースに構築されている
+（ただし、UI コンポーネントにしては、学習コストがやや高い）
+
+### 1. shadcn/ui の導入手順
+
+1. shadcn/ui のパスを設定する
+
+```tsconfig.json
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+
+```
+
+この設定によって、相対パス（例: ../../component）ではなく、
+エイリアス（例: @/component）を使用した簡潔なインポートが可能になります！
+
+2. tsconfig.app.jsonファイルに、次のコードを追加します
+
+```
+{
+  "compilerOptions": {
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}
+
+```
+
+3. 次のコードを vite.config.ts に設定を追加します
+
+```ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import tailwindcss from "@tailwindcss/vite";
+import path from "path";
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+});
+
+```
+
+もし、pathに関するエラーが発生したら、下記を実行します
+
+```sh
+npm i -D @types/node
+```
+
+4. shadcn/ui の初期化コマンドを実行
+
+それでは、shadcn/ui の初期化コマンドを実行して、プロジェクトをセットアップします
+
+```sh
+npx shadcn@latest init
+```
+
+Need to install the following packages:
+shadcn@3.5.1
+Ok to proceed? (y) 
+
+```
+? Which color would you like to use as the base color? › - Use arrow-keys. Return to submit.
+❯   Neutral
+```
+
+5. shadcn/ui のコンポーネントを追加
+
+```sh
+npx shadcn@latest add button checkbox dialog dropdown-menu input textarea separator switch table
+```
+
+6. 確認
+
+src/App.tsxを、以下のように書き換えます。
+
+```tsx
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+function App() {
+  return (
+    <div className="p-8 space-y-4">
+      <h1 className="text-2xl font-bold">shadcn/ui コンポーネント確認</h1>
+
+      <Button>ボタン</Button>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox id="terms" />
+        <label htmlFor="terms">チェックボックス</label>
+      </div>
+
+      <Input placeholder="入力フィールド" />
+
+      <Textarea placeholder="テキストエリア" />
+
+      <div className="flex items-center space-x-2">
+        <Switch id="airplane-mode" />
+        <label htmlFor="airplane-mode">スイッチ</label>
+      </div>
+
+      <Separator />
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline">ダイアログを開く</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>ダイアログ</DialogTitle>
+            <DialogDescription>これはダイアログの例です。</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">ドロップダウン</Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>項目1</DropdownMenuItem>
+          <DropdownMenuItem>項目2</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>列1</TableHead>
+            <TableHead>列2</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>データ1</TableCell>
+            <TableCell>データ2</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+export default App;
+```
+
+開発サーバーを起動して確認してみましょう。
+
+shadcn/ui のセットアップは完了です.
+
+7. git でプロジェクトを管理する
+
+```sh
+git add .
+git commit -m "shadcn/ui のセットアップ"
+```
+
+8. 本章のまとめ
+
+shadcn/ui は、コピー&ペーストして使用するコンポーネントのコレクション
+Tailwind CSS と Radix UI をベースに、高度にカスタマイズ可能な UI コンポーネントを提供している
+npx shadcn@latest initコマンドで、プロジェクト全体の設定を簡単に行える
+デザインスタイル、ベースカラー、CSS 変数の使用などを初期設定時に選択可能
+これにより、強力なデザインシステムと柔軟な拡張性を搭載した状態から、開発をスタートできます！
+
+## Chapter 04 ページ切り替えサイドバーの作成
+
+
+## Chapter 05 アイデアブロックの実装
+## Chapter 06 ToDo データベース機能の実装
+## Chapter 07 GitHub Pages へのデプロイ
 
  
 
