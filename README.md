@@ -1110,6 +1110,77 @@ export default function NotionTodoApp() {
 }
 ```
 
+
+解説：
+アプリケーション構造の設計において、
+Provider パターンで、Context を最上位で提供し、子コンポーネントでアクセスしています！
+
+### 8. 確認
+
+開発サーバーを起動して　以下のようにサイドバーが表示され、
+ページの切り替えや追加・削除ができていたら、このタスクは完了です
+
+### 9. git でプロジェクトを管理する
+
+```sh
+git add .
+git commit -m "サイドバーの実装"
+```
+
+### 10. 本章のまとめ
+
+Context とは？
+Context は React が提供する、グローバル状態管理の仕組みです。
+
+利点としては、：
+
+Props のバケツリレー（プロップドリリング）問題の解決
+React 標準機能（追加ライブラリ不要）で、コンポーネント間でのデータ共有が可能
+
+Context の基本的な使い方は？
+Context の基本的な実装パターンは以下の 3 ステップです：
+
+Context の作成：createContext() でコンテキストを作成
+Provider でラップ：データを共有したいコンポーネントツリーを Provider でラップ
+useContext で使用：子コンポーネントで useContext() を使用してデータにアクセス
+
+// 1. Context作成
+const MyContext = createContext();
+
+// 2. Provider でラップ
+<MyContext.Provider value={data}>
+  <ChildComponent />
+</MyContext.Provider>;
+
+// 3. 子コンポーネントで使用
+const data = useContext(MyContext);
+Context の注意点は？
+
+Context にはパフォーマンス上の注意点があります：
+
+再レンダリング問題：Context の値が変更されると、Provider 内の全ての子コンポーネントが再レンダリングされる
+Provider タワー：複数の Context を使用すると、Provider の入れ子が深くなり依存関係が複雑化する
+最適化の難しさ：手動での memo 化や複数 Provider による最適化は煩雑になりがち
+2025 年現在の推奨事項：
+
+Context API の代替として、以下のライブラリが人気：
+
+Zustand：軽量で使いやすい状態管理
+Jotai：原子的な状態管理
+Context API は React の基本的な状態管理手法として理解しておくべきですが、
+2025 年現在では、より高性能で使いやすい代替ライブラリが多数存在します！
+
+
+このセクションで学んだこと：
+
+Context API を使用したグローバル状態管理の実装
+カスタムフック による Context アクセスの簡素化
+TypeScript による型安全な状態管理
+Notion 風 UI のサイドバー実装
+コンポーネント分離 による保守性の向上
+
+
+
 ## Chapter 05 アイデアブロックの実装
 ## Chapter 06 ToDo データベース機能の実装
 ## Chapter 07 GitHub Pages へのデプロイ
