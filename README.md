@@ -1181,7 +1181,7 @@ Notion 風 UI のサイドバー実装
 
 アイデアを自由にメモして、ドラッグ&ドロップで整理できる機能を実装しましょう！
 
-### immer とは？
+### 1. immer とは？
 
 Immer は「イミュータブル（不変）な状態更新を、ミュータブル（可変）な記法で書ける」ライブラリです。
 
@@ -1204,6 +1204,25 @@ const newState = {
 };
 ```
 
+Immer を使用した場合：
+
+```
+// Immer使用：直感的で読みやすい
+updateIdeas((draft) => {
+  draft[dragIndex].position = newPosition;
+});
+```
+
+Immer により、複雑な配列操作やネストしたオブジェクトの更新が簡単になります！
+
+1. ライブラリのインストール
+
+Immer 関連のライブラリをインストールします
+
+
+```sh
+npm install immer use-immer
+```
 
 ## Chapter 06 ToDo データベース機能の実装
 ## Chapter 07 GitHub Pages へのデプロイ
