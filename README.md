@@ -101,15 +101,14 @@ ToDo データベース機能
 
 着手すべきタスク（Issues）は、以下のとおりです：
 
-## 環境構築
 
-## 1 Vite による React プロジェクトの作成
-## 2 プロジェクトにTailwind CSS の導入
-## 3 shadcn/ui の導入
-## 4 ページ切り替えサイドバーの作成
-## 5 アイデアブロックの実装
-## 6 ToDo データベース機能の実装
-## 7 GitHub Pages へのデプロイ
+## Chapter 01 Vite による React プロジェクトの作成
+## Chapter 02 プロジェクトにTailwind CSS の導入
+## Chapter 03 shadcn/ui の導入
+## Chapter 04 ページ切り替えサイドバーの作成
+## Chapter 05 アイデアブロックの実装
+## Chapter 06 ToDo データベース機能の実装
+## Chapter 07 GitHub Pages へのデプロイ
 
 ## 1 Vite による React プロジェクトの作成
 
@@ -262,6 +261,13 @@ src/App.tsx ファイルをH1タグに対し、スタイルを当ててみます
 
 ```sh
 npm run dev
+```
+
+### 6. git でプロジェクトを管理する
+
+```sh
+git add .
+git commit -m "Tailwind CSSのセットアップ"
 ```
 
 ## 3 shadcn/ui の導入
