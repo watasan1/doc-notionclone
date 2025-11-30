@@ -1221,7 +1221,7 @@ Immer 関連のライブラリをインストールします
 
 
 ```sh
-npm install immer use-immer
+% npm install immer use-immer
 ```
 
 ## Chapter 06 ToDo データベース機能の実装
