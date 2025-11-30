@@ -55,10 +55,10 @@ GitHub Pages へのデプロイ
 
 ## システム要件
 
-Node.js 環境（v20.9.0 以上）が構築されたPCが必要です
-Git/ GitHub環境（アカウント）の用意
-HTML/CSS/JavaScriptの基礎知識が必要です
-Reactの基礎（Progateレベルの内容）は理解している前提の内容となっております
+- Node.js 環境（v20.9.0 以上）が構築されたPCが必要です。
+- Git/ GitHubの環境を作成する。
+- HTML/CSS/JavaScriptの基礎知識が必要です。
+- Reactの基礎（Progateレベルの内容）は理解している前提の内容となっております
 
 
 ## 要件定義
