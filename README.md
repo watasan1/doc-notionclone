@@ -509,14 +509,214 @@ React の状態管理の基本概念：
 不変性（Immutability）：状態を直接変更せず、更新用関数を使用して新しい状態を作成する間接的な更新
 単方向データフロー：親 → 子コンポーネントへ、データが一方向に流れることで、バグを減らし、デバッグを容易にする
 
-### 2. サイドバーの作成の手順
+### 2. データ型の定義
 
-1. データ型の定義
-2. 初期データの記載
-コンテキストの定義
-サイドバーコンポーネントの作成
-ページ追加ダイアログの作成
-アプリケーションの統合
+ページとアプリケーション全体で使用するデータ構造を定義します。
+
+src/types/index.ts　ファイルを作成します。
+
+```sh
+% mkdir -p src/types && touch src/types/index.ts
+```
+
+```ts
+/**
+ * アプリケーション共通型定義
+ *
+ * このモジュールはアプリケーション全体で使用される
+ * データ構造とUI状態の型定義を提供します。
+ */
+
+// ページ（カテゴリ）情報を表す型
+// サイドバーでのページ表示とコンテンツフィルタリングに使用
+export interface Page {
+  id: string;
+  title: string;
+  isActive: boolean; // 現在選択中のページかどうか
+  category: string; // フィルタリング用のカテゴリ識別子
+  emoji: string;
+}
+
+// アイデア情報を表す型
+// 簡易的なメモ機能として使用
+export interface Idea {
+  id: string;
+  text: string;
+  createdAt: Date;
+  category: string; // 所属ページのカテゴリ
+}
+
+// TODO情報を表す型
+// タスク管理機能のメインデータ構造
+export interface Todo {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  category: string; // 所属ページのカテゴリ
+}
+
+// UI状態の型定義
+export interface UIState {
+  sidebarOpen: boolean;
+  selectedTodo: Todo | null;
+  editingTodo: Todo | null;
+  draggedIdea: string | null;
+}
+```
+
+### 3. 初期データの記載
+
+アプリケーション起動時に表示するサンプルデータを定義します。
+
+src/constants/initial-data.ts　ファイルを作成します。
+
+```sh
+% mkdir -p src/constants && touch src/constants/initial-data.ts
+```
+
+```
+/**
+ * アプリケーション初期データ定義
+ *
+ * このモジュールはアプリケーション起動時に使用される
+ * ページ、アイデア、TODOの初期データを提供します。
+ */
+import type { Page, Idea, Todo } from "@/types";
+
+// サイドバーに表示されるページの初期データ
+// 各ページはカテゴリ別にコンテンツをフィルタリングする役割を持つ
+export const INITIAL_PAGES: Page[] = [
+  {
+    id: "1",
+    title: "全般",
+    isActive: true,
+    category: "general",
+    emoji: "✅",
+  },
+  {
+    id: "2",
+    title: "メインプロジェクト",
+    isActive: false,
+    category: "work",
+    emoji: "💼",
+  },
+  {
+    id: "3",
+    title: "学習",
+    isActive: false,
+    category: "learning",
+    emoji: "🎓",
+  },
+  {
+    id: "4",
+    title: "生活面（プライベート）",
+    isActive: false,
+    category: "personal",
+    emoji: "🏠",
+  },
+];
+
+// デモ用のアイデア初期データ
+// 実際の運用では空配列または外部データソースから読み込む
+export const INITIAL_IDEAS: Idea[] = [
+  {
+    id: "1",
+    text: "個人ポートフォリオサイトを構築する",
+    createdAt: new Date("2025-05-15"),
+    category: "general",
+  },
+  {
+    id: "2",
+    text: "React の状態管理についての記事を読む",
+    createdAt: new Date("2025-05-16"),
+    category: "work",
+  },
+  {
+    id: "3",
+    text: "個人開発の開発計画を立てる",
+    createdAt: new Date("2025-05-17"),
+    category: "work",
+  },
+  {
+    id: "4",
+    text: "週末旅行を計画する",
+    createdAt: new Date("2025-05-18"),
+    category: "personal",
+  },
+];
+
+// デモ用のTODO初期データ
+// 様々なステータスとカテゴリのサンプルを含む
+export const INITIAL_TODOS: Todo[] = [
+  {
+    id: "1",
+    title: "デザインシステムの調査",
+    description:
+      "## 概要\n現代的なデザインシステムとコンポーネントライブラリを調査\n\n## 目的\nデザインシステムとコンポーネントライブラリを調査し、最適なものを選定する\n\n## 方法\n- 現代的なデザインシステムとコンポーネントライブラリを調査\n- 調査結果をまとめる",
+    completed: false,
+    createdAt: new Date("2025-05-15"),
+    updatedAt: new Date("2025-05-15"),
+    category: "work",
+  },
+  {
+    id: "2",
+    title: "開発環境のセットアップ",
+    description: "必要なツールをインストールし、ワークスペースを設定",
+    completed: true,
+    createdAt: new Date("2025-05-14"),
+    updatedAt: new Date("2025-05-16"),
+    category: "work",
+  },
+  {
+    id: "3",
+    title: "ワイヤーフレームの作成",
+    description: "アプリケーションの初期ワイヤーフレームを設計",
+    completed: false,
+    createdAt: new Date("2025-05-16"),
+    updatedAt: new Date("2025-05-16"),
+    category: "work",
+  },
+  {
+    id: "4",
+    title: "1週間の食事の計画",
+    description: "1週間の食事の計画を立てる",
+    completed: false,
+    createdAt: new Date("2025-05-17"),
+    updatedAt: new Date("2025-05-17"),
+    category: "personal",
+  },
+  {
+    id: "5",
+    title: "React Hooksの記事を書く",
+    description: "React Hooksの学習をまとめる記事を書く",
+    completed: true,
+    createdAt: new Date("2025-05-12"),
+    updatedAt: new Date("2025-05-15"),
+    category: "learning",
+  },
+  {
+    id: "6",
+    title: "プロジェクト提案書のレビュー",
+    description: "新しいクライアントの提案書をチェック",
+    completed: false,
+    createdAt: new Date("2025-05-18"),
+    updatedAt: new Date("2025-05-18"),
+    category: "general",
+  },
+];
+
+```
+
+
+
+### 4. コンテキストの定義
+### 5. サイドバーコンポーネントの作成
+### 6. ページ追加ダイアログの作成
+### 7. アプリケーションの統合
+
 
 
 
